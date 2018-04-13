@@ -1,4 +1,4 @@
-#from .handlers import comboHandler
+from .handlers import comboHandler
 
 """
 class Achivement(object):
@@ -45,7 +45,7 @@ class Achivement():
 ACHIVEMENTS = {
 	1: {
 		"std": [
-			#comboHandler
+			comboHandler
 		],
 		"taiko": [
 
