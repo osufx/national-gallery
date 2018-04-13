@@ -24,22 +24,24 @@ class Achivement(object):
 }
 """
 
+# Will most likely have to change this to work differently as it needs to assign a different index for every actual achivement.
+# SQL is a posibility...
 ACHIVEMENTS = {
 	1: {
-		"osu": {
-			"combo": comboHandler
-		},
-		"taiko": {
+		"osu": [
+			comboHandler
+		],
+		"taiko": [
 
-		},
-		"fruits": {
+		],
+		"fruits": [
 
-		},
-		"mania": {
+		],
+		"mania": [
 
-		},
-		"all": {
+		],
+		"all": [
 
-		}
+		]
 	}
 }

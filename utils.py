@@ -3,7 +3,7 @@ from . import achivement
 from common.ripple import userUtils, scoreUtils
 
 def load_achievements():
-    glob.ACHIEVEMENTS_VERSION = 1
+    glob.ACHIEVEMENTS_VERSION = max(achivement.ACHIVEMENTS)
 
 def unlock_achivements_gamemode(score, beatmap, user_data, gamemode):
 	pass
@@ -75,9 +75,10 @@ def unlock_achievements(score, beatmap, user_data):
 	if user_version < glob.ACHIEVEMENTS_VERSION:
 		achivements += unlock_achievements_update(userID, user_version)
 
+	# Check if user should get new achivement
 	for version in achivement.ACHIVEMENTS.values():
 		for callback in version[gamemode_name]:
-			callback.handle(gamemode_name, score)
+			achivements += callback.handle(gamemode_name, score)
 
 	return achivements
 
