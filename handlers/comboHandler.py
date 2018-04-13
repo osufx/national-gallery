@@ -10,7 +10,14 @@ def handle(mode, score):
 	"""
 	achivements = []
 
-	# TODO: Well... em... everything?
+	if score.maxCombo > 500:
+		achivements.append(
+			{
+				"title": "500 Combo osu!{}".format("""gamemode name"""),
+				"subtitle": "500 big ones! You're moving up in the world!",
+				"icon": ""
+			}
+		)
 
 	return achivements
 

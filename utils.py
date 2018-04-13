@@ -3,6 +3,8 @@ from . import achivement
 from common.ripple import userUtils, scoreUtils
 
 def load_achievements():
+	# TODO: actually do what the function name suggests
+	#	Load from external source achivements into glob.achivementClasses
     glob.ACHIEVEMENTS_VERSION = max(achivement.ACHIVEMENTS)
 
 def unlock_achivements_gamemode(score, beatmap, user_data, gamemode):
