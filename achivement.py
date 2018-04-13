@@ -1,4 +1,4 @@
-from .handlers import comboHandler
+from . handlers import comboHandler
 
 """
 class Achivement(object):
