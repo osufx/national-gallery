@@ -36,6 +36,9 @@ class Achivement():
 	def format(self, **kwargs):
 		for key, value in self.__dict__.items():
 			setattr(self, key, value.format(**kwargs))
+	
+	def getData(self):
+		return "{icon}+{title}+{subtitle}".format(**self.__dict__)
 
 # Will most likely have to change this to work differently as it needs to assign a different index for every actual achivement.
 # SQL is a posibility...
