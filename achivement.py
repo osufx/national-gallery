@@ -1,4 +1,4 @@
-from .handlers import comboHandler
+#from .handlers import comboHandler
 
 """
 class Achivement(object):
@@ -24,12 +24,25 @@ class Achivement(object):
 }
 """
 
+class Achivement():
+	title		= None
+	subtitle	= None
+	icon		= None
+
+	def __init__(self, **kwargs):
+		for key, value in kwargs.items():
+			setattr(self, key, value)
+	
+	def format(self, **kwargs):
+		for key, value in self.__dict__.items():
+			setattr(self, key, value.format(**kwargs))
+
 # Will most likely have to change this to work differently as it needs to assign a different index for every actual achivement.
 # SQL is a posibility...
 ACHIVEMENTS = {
 	1: {
-		"osu": [
-			comboHandler
+		"std": [
+			#comboHandler
 		],
 		"taiko": [
 

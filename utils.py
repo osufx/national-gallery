@@ -69,8 +69,6 @@ def unlock_achievements(score, beatmap, user_data):
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
 	gamemode_name = scoreUtils.readableGameMode(gamemode_index)
-	if gamemode_name == "std":
-		gamemode_name = "osu"
 
 	# Check if user should run achivement recheck
 	user_version = userUtils.getAchievementsVersion(userID)
