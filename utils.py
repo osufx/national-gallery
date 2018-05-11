@@ -112,8 +112,6 @@ def unlock_achievements(score, beatmap, user_data):
 		glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(achieved), 1800)
 	else:
 		achieved = json.loads(achieved.decode("utf-8"))
-	
-	print(achieved)
 
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
@@ -128,6 +126,9 @@ def unlock_achievements(score, beatmap, user_data):
 	for handler in glob.achievementClasses.values():
 		achievements += [x + index for x in handler.handle(gamemode_index, score, beatmap, user_data)]
 		index += handler.LENGTH
+	
+	# Remove duplicated achievements (incase of unlock_achievements_update adding stuff)
+	achievements = list(set(achievements))
 
 	# Remove already achived achievements from list
 	achievements = [x for x in achievements if x not in achieved]
