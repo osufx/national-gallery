@@ -16,6 +16,10 @@ def load_achievements():
 	for module in modules:
 		module = importlib.import_module("handlers." + module)
 		module.load()
+		if module.ORDER in glob.achievementClasses:
+			print("!!! FOUND OVERLAPPING ACHIEVEMENT ORDER FOR {}!!!".format(module.ORDER))
+			print("Unable to load {} due to {} already loaded in slot {}".format(module.__name__, glob.achievementClasses[module.ORDER].__name__, module.ORDER))
+			continue
 		glob.achievementClasses[module.ORDER] = module
 		glob.ACHIEVEMENTS_VERSION = max(glob.ACHIEVEMENTS_VERSION, module.VERSION)
 	
