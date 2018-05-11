@@ -2,6 +2,10 @@ from os.path import dirname, basename, isfile
 import glob
 import importlib
 
+if __name__ is not "__main__":
+	print("This is ment to be runned as a toolkit for generating achievement database")
+	exit()
+
 SQL_STRING = """
 CREATE TABLE IF NOT EXISTS `achievements` (
   `id` int(11) NOT NULL,
@@ -20,7 +24,9 @@ module_list = [basename(f)[:-3] for f in module_list if isfile(f) and not f.ends
 
 modules = []
 for module in module_list:
-	modules.append(importlib.import_module("handlers." + module))
+	module_strip = {""}
+	
+	modules.append(importlib.import_module("handlers.{}.{}".format(module, focus)))
 
 modules = sorted(modules, key=lambda k: k.ORDER)
 

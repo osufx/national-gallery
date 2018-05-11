@@ -1,4 +1,4 @@
-import math
+from secret.achievements import common
 from objects import glob
 
 VERSION = 1
@@ -29,16 +29,8 @@ ACHIEVEMENT_STRUCT = {
 ACHIEVEMENTS = []
 
 def load():
-	global LENGTH
-	for struct in ACHIEVEMENT_STRUCT:
-		LENGTH = max(LENGTH, len(ACHIEVEMENT_KEYS[struct]) * ACHIEVEMENT_STRUCT[struct])
-	
-	entry = {x:0 for x in ACHIEVEMENT_STRUCT}
-	for i in range(LENGTH):
-		for struct in ACHIEVEMENT_STRUCT:
-			entry[struct] = math.floor(i / ACHIEVEMENT_STRUCT[struct]) % len(ACHIEVEMENT_KEYS[struct])
-		format_data = {x:ACHIEVEMENT_KEYS[x][entry[x]] for x in ACHIEVEMENT_KEYS}
-		ACHIEVEMENTS.append({x: ACHIEVEMENT_BASE[x].format_map(format_data) for x in ACHIEVEMENT_BASE})
+	global ACHIEVEMENTS, LENGTH
+	ACHIEVEMENTS, LENGTH = common.load_achievement_data(ACHIEVEMENT_BASE, ACHIEVEMENT_KEYS, ACHIEVEMENT_STRUCT)
 
 def handle(mode, score, beatmap, user_data):
 	return check(mode, score.maxCombo)
