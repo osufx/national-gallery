@@ -5,16 +5,16 @@ import glob as _glob
 import importlib
 
 def load_achievements():
-	"""Load all the achivements from the sql server into glob.achievementClasses,
+	"""Load all the achievements from the sql server into glob.achievementClasses,
 	and sets glob.ACHIEVEMENTS_VERSION to the highest version number in our achievement list.
 	"""
 
-	modules = _glob.glob("handlers/*.py")
+	modules = _glob.glob("secret/achievements/handlers/*.py")
 	modules = [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith("__init__.py")]
 	#						^ cat face
 
 	for module in modules:
-		module = importlib.import_module("handlers." + module)
+		module = importlib.import_module("secret.achievements.handlers." + module)
 		module.load()
 		if module.ORDER in glob.achievementClasses:
 			print("!!! FOUND OVERLAPPING ACHIEVEMENT ORDER FOR {}!!!".format(module.ORDER))
@@ -26,7 +26,7 @@ def load_achievements():
 	print("Loaded {} achievements!".format(len(modules)))
 
 def get_achievements_with_version(version):
-	"""Return same established achivement list structure but only with the achivements that matches
+	"""Return same established achivement list structure but only with the achievements that matches
 	the argument passed.
 	
 	Arguments:
@@ -35,63 +35,63 @@ def get_achievements_with_version(version):
 	Returns:
 		Dict -- Filtered achivement list
 	"""
-	achivements = {}
+	achievements = {}
 	for mode, mode_val in glob.achievementClasses.items():
-		if mode not in achivements:
-			achivements[mode] = {}
+		if mode not in achievements:
+			achievements[mode] = {}
 		for handle, handle_val in mode_val.items():
-			if handle not in achivements[mode]:
-				achivements[mode][handle] = []
+			if handle not in achievements[mode]:
+				achievements[mode][handle] = []
 			for entry in handle_val:
 				if entry["version"] == version:
-					achivements[mode][handle].append(entry)
-	return achivements
+					achievements[mode][handle].append(entry)
+	return achievements
 
 def unlock_achievements_scan(userID, version):
-	"""Scan specific version for past achivements they should have unlocked
+	"""Scan specific version for past achievements they should have unlocked
 	
 	Arguments:
 		userID {int} -- User id of a player
 		version {int} -- Achivement version to scan
 	"""
-	achivements = []
+	achievements = []
 
-	#ach = achivement.ACHIVEMENTS[version]
+	#ach = achivement.ACHIEVEMENTS[version]
 	for mode, mode_val in glob.achievementClasses.items():
 		for handle, handle_val in mode_val.items():
 			pass
 			#for entry in handle_val:
-			#achivements += glob.achievementHandlers[handle].scan(mode, userID)
+			#achievements += glob.achievementHandlers[handle].scan(mode, userID)
 	
-	return achivements
+	return achievements
 
 def unlock_achievements_update(userID, version):
-	"""Scans the user for past achivements they should have unlocked
+	"""Scans the user for past achievements they should have unlocked
 	
 	Arguments:
 		userID {int} -- User id of a player
 		version {int} -- Last achivement version the player had
 	
 	Returns:
-		Array -- List of achivements
+		Array -- List of achievements
 	"""
-	achivements = []
+	achievements = []
 
 	# Scan all past achivement versions from the user's achivement version to the latest
 	"""
-	scan = [v for v in achivement.ACHIVEMENTS.keys() if v > version]
+	scan = [v for v in achivement.ACHIEVEMENTS.keys() if v > version]
 	for v in scan:
-		achivements += unlock_achievements_scan(userID, v)
+		achievements += unlock_achievements_scan(userID, v)
 	"""
 	print("1")
 
 	# Update achivement version for user
 	userUtils.updateAchievementsVersion(userID)
 
-	return achivements
+	return achievements
 
 def unlock_achievements(score, beatmap, user_data):
-	"""Return array of achivements the current play recived
+	"""Return array of achievements the current play recived
 	
 	Arguments:
 		score {Score} -- Score data recived from replay
@@ -99,34 +99,42 @@ def unlock_achievements(score, beatmap, user_data):
 		user_data {dict} -- Info about the current player
 	
 	Returns:
-		Array -- List of achivements for the current play
+		Array -- List of achievements for the current play
 	"""
-	achivements = []
+	achievements = []
 
 	userID = userUtils.getID(score.playerName)
+	achieved = glob.redis.get("lets:user_achievement_cache:{}".format(userID))
+	if achieved is None:
+		# Load from sql database
+		achieved = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id=%s", [userID])]
+		glob.redis.set("lets:user_achievement_cache:{}".format(userID), achieved, 1800)
 
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
-	gamemode_name = scoreUtils.readableGameMode(gamemode_index)
-
-	print("version: {}".format(glob.ACHIEVEMENTS_VERSION))
 
 	# Check if user should run achivement recheck
 	user_version = userUtils.getAchievementsVersion(userID)
 	if user_version < glob.ACHIEVEMENTS_VERSION:
-		achivements += unlock_achievements_update(userID, user_version)
+		achievements += unlock_achievements_update(userID, user_version)
 
 	# Check if gameplay should get new achivement
 	index = 0
 	for handler in glob.achievementClasses.values():
-		achivements += [x + index for x in handler.handle(gamemode_index, score, beatmap)]
+		achievements += [x + index for x in handler.handle(gamemode_index, score, beatmap, user_data)]
 		index += handler.LENGTH
 	
-	# TODO: use user_data to remove achievements we already have
+	glob.redis.set("lets:user_achievement_cache:{}".format(userID), achievements, 1800)
 
-	return achivements
+	# Remove already achived achievements from list
+	achievements = [x for x in achievements if x not in achieved]
 
-def achievements_response(achivements):
+	for achievement in achievements:
+		userUtils.unlockAchievement(userID, achievement)
+
+	return achievements
+
+def achievements_response(achievements):
     #Achievement structure is:
     #"+".join([name/load, title, subtitle])
 

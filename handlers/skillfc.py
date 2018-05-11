@@ -1,4 +1,5 @@
 import math
+from common.ripple import scoreUtils
 
 VERSION = 3
 ORDER = 3
@@ -83,14 +84,16 @@ def load():
 		format_data = {x:ACHIEVEMENT_KEYS[x][entry[x]] for x in ACHIEVEMENT_KEYS}
 		ACHIEVEMENTS.append({x: ACHIEVEMENT_BASE[x].format_map(format_data) for x in ACHIEVEMENT_BASE})
 
-def handle(mode, score, beatmap):
+def handle(mode, score, beatmap, user_data):
 	if not score.fullCombo: # No need to check if the score were not a fullcombo
 		return []
 
 	achievement_ids = []
 
-	mode_2 = mode.replace("osu", "std")
-	stars = beatmap["stars" + mode_2.title()]
+	mode_str = scoreUtils.readableGameMode(mode)
+
+	mode_2 = mode_str.replace("osu", "std")
+	stars = getattr(beatmap, "stars" + mode_2.title())
 
 	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x == stars]
 

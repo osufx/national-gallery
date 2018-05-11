@@ -1,4 +1,5 @@
 import math
+#from objects import glob
 
 VERSION = 1
 ORDER = 1
@@ -39,7 +40,7 @@ def load():
 		format_data = {x:ACHIEVEMENT_KEYS[x][entry[x]] for x in ACHIEVEMENT_KEYS}
 		ACHIEVEMENTS.append({x: ACHIEVEMENT_BASE[x].format_map(format_data) for x in ACHIEVEMENT_BASE})
 
-def handle(mode, score, beatmap):
+def handle(mode, score, beatmap, user_data):
 	achievement_ids = []
 	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x <= score.maxCombo]
 
