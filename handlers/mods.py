@@ -1,6 +1,9 @@
-from secret.achievements import common
-from objects import glob
-from common.constants import mods
+if __name__ != "handlers.mods":
+	from secret.achievements import common
+	from objects import glob
+	from common.constants import mods
+else:
+	import common
 
 VERSION = 4
 ORDER = 4

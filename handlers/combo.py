@@ -1,5 +1,8 @@
-from secret.achievements import common
-from objects import glob
+if __name__ != "handlers.combo":
+	from secret.achievements import common
+	from objects import glob
+else:
+	import common
 
 VERSION = 1
 ORDER = 1

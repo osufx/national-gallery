@@ -1,7 +1,10 @@
-import math
-from secret.achievements import common
-from common.ripple import scoreUtils
-from objects import glob, beatmap
+if __name__ != "handlers.skillpass":
+	import math
+	from secret.achievements import common
+	from common.ripple import scoreUtils
+	from objects import glob, beatmap
+else:
+	import common
 
 VERSION = 2
 ORDER = 2

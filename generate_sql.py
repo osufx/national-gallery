@@ -1,10 +1,13 @@
+if __name__ != "__main__":
+	print("This is ment to be runned as a toolkit for generating achievement database")
+	exit()
+
+import common
 from os.path import dirname, basename, isfile
 import glob
 import importlib
-
-if __name__ is not "__main__":
-	print("This is ment to be runned as a toolkit for generating achievement database")
-	exit()
+import time
+import math
 
 SQL_STRING = """
 CREATE TABLE IF NOT EXISTS `achievements` (
@@ -24,30 +27,32 @@ module_list = [basename(f)[:-3] for f in module_list if isfile(f) and not f.ends
 
 modules = []
 for module in module_list:
-	module_strip = {""}
-	
-	modules.append(importlib.import_module("handlers.{}.{}".format(module, focus)))
+	modules.append(importlib.import_module("handlers.{}".format(module)))
 
 modules = sorted(modules, key=lambda k: k.ORDER)
 
-index = 0
+SQL_INSERTS = []
+index = 1
 for module in modules:
-	achievement = module.TABLE.achievement
-	uniq = achievement.unique
-	rep = achievement.replacements
-
-	length = 1
-	for x in [rep[y] for y in uniq]:
-		length *= len(x)
-
-	rep_map = {x:[rep] for x in rep}
-
-	for i in range(length):
+	module.load()
+	for achievement in module.ACHIEVEMENTS:
+		SQL_INSERTS.append("({}, '{}', '{}', '{}', {})".format(
+			index,
+			achievement["name"].replace('"', '\\"').replace("'", "\\'"),
+			achievement["description"].replace('"', '\\"').replace("'", "\\'"),
+			achievement["icon"].replace('"', '\\"').replace("'", "\\'"),
+			module.VERSION
+			))
 		index += 1
-		name = achievement.name.format_map({
 
-		})
-		#SQL_STRING += "({}, '{}', '{}', '{}', {})".format(index, )
-		#SQL_STRING += len(rep.index) * len(rep.mode)
+SQL_STRING += ",\n".join(SQL_INSERTS) + ";"
 
-print(SQL_STRING)
+FILENAME = "achievements-{}.sql".format(math.floor(time.time()))
+with open(FILENAME, "w") as f:
+	f.write(SQL_STRING)
+
+print("Saved sql export into {}".format(FILENAME))
+print("Import this table into your database.")
+print("""NOTE: Avoid changing the ORDER variable inside the handlers at all cost as this will result in
+new achievement sql data not matching data of already achieved achievements by users.""")
+print("If you know what you are doing you know how to fix this if you still choose to ignore this warning")

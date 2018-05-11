@@ -4,3 +4,5 @@
 
 Achivement submodule for secret module.
 Used to enable custom achivements and events.
+
+Run `python3 generate_sql.py` to generate sql import file for you sql server!
