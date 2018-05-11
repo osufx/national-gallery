@@ -39,13 +39,6 @@ def unlock_achievements_update(userID, version):
 	achievements = []
 
 	# Scan all past achivement versions from the user's achivement version to the latest
-	"""
-	scan = [v for v in achivement.ACHIEVEMENTS.keys() if v > version]
-	for v in scan:
-		achievements += unlock_achievements_scan(userID, v)
-	"""
-
-	# Scan all past achivement versions from the user's achivement version to the latest
 	index = 0
 	for handler in glob.achievementClasses.values():
 		if handler.VERSION > version:
@@ -111,7 +104,7 @@ def achievements_response(achievements):
 
 	index = 0
 	for handler in glob.achievementClasses.values():
-		achievement_objects += [handler.ACHIEVEMENTS[x - index] for x in achievements if len(handler.ACHIEVEMENTS) >= x]
+		achievement_objects += [handler.ACHIEVEMENTS[x - index] for x in achievements if len(handler.ACHIEVEMENTS) > x - index and x - index >= 0]
 		index += handler.LENGTH
 
 	achievements_packed = []

@@ -47,7 +47,7 @@ def check(mode, max_combo):
 	achievement_ids = []
 	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x <= max_combo]
 
-	for index in indexies:
+	for index in range(len(indexies)):
 		achievement_ids.append(index + mode * 4)
 
 	return achievement_ids
