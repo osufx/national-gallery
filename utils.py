@@ -3,6 +3,7 @@ from common.ripple import userUtils, scoreUtils
 from os.path import dirname, basename, isfile
 import glob as _glob
 import importlib
+import json
 
 def load_achievements():
 	"""Load all the achievements from the sql server into glob.achievementClasses,
@@ -108,7 +109,11 @@ def unlock_achievements(score, beatmap, user_data):
 	if achieved is None:
 		# Load from sql database
 		achieved = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id=%s", [userID])]
-		glob.redis.set("lets:user_achievement_cache:{}".format(userID), achieved, 1800)
+		glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(achieved), 1800)
+	else:
+		achieved = json.loads(achieved.decode("utf-8"))
+	
+	print(achieved)
 
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
@@ -123,11 +128,11 @@ def unlock_achievements(score, beatmap, user_data):
 	for handler in glob.achievementClasses.values():
 		achievements += [x + index for x in handler.handle(gamemode_index, score, beatmap, user_data)]
 		index += handler.LENGTH
-	
-	glob.redis.set("lets:user_achievement_cache:{}".format(userID), achievements, 1800)
 
 	# Remove already achived achievements from list
 	achievements = [x for x in achievements if x not in achieved]
+
+	glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(achieved + achievements), 1800)
 
 	for achievement in achievements:
 		userUtils.unlockAchievement(userID, achievement)
@@ -135,10 +140,15 @@ def unlock_achievements(score, beatmap, user_data):
 	return achievements
 
 def achievements_response(achievements):
-    #Achievement structure is:
-    #"+".join([name/load, title, subtitle])
+	achievement_objects = []
 
-	return ""
+	index = 0
+	for handler in glob.achievementClasses.values():
+		achievement_objects += [handler.ACHIEVEMENTS[x - index] for x in achievements if len(handler.ACHIEVEMENTS) >= x]
+		index += handler.LENGTH
 
-# Just a test
-# return "taiko-skill-fc-3+Test medal+Hia/taiko-skill-fc-1+More of them+yay"
+	achievements_packed = []
+	for achievement_object in achievement_objects:
+		achievements_packed.append("+".join([achievement_object["icon"], achievement_object["name"], achievement_object["description"]]))
+
+	return "/".join(achievements_packed)

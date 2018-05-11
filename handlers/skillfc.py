@@ -95,7 +95,7 @@ def handle(mode, score, beatmap, user_data):
 	mode_2 = mode_str.replace("osu", "std")
 	stars = getattr(beatmap, "stars" + mode_2.title())
 
-	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x == stars]
+	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x == math.floor(stars)]
 
 	for index in indexies:
 		achievement_ids.append(mode + index * 4)
