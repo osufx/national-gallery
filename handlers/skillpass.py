@@ -1,7 +1,6 @@
 import math
 from common.ripple import scoreUtils
-from objects import glob
-from objects import beatmap
+from objects import glob, beatmap
 
 VERSION = 2
 ORDER = 2
@@ -111,7 +110,7 @@ def update(userID):
 	for entry in entries:
 		current_beatmap = beatmap.beatmap()
 		current_beatmap.setDataFromDB(entry["beatmap_md5"])
-		
+
 		achievement_ids += check(entry["play_mode"], entry["beatmap_md5"])
 
 	return achievement_ids

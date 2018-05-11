@@ -1,5 +1,6 @@
 import math
 from common.ripple import scoreUtils
+from objects import glob, beatmap
 
 VERSION = 3
 ORDER = 3
@@ -87,7 +88,9 @@ def load():
 def handle(mode, score, beatmap, user_data):
 	if not score.fullCombo: # No need to check if the score were not a fullcombo
 		return []
+	return check(mode, beatmap)
 
+def check(mode, beatmap):
 	achievement_ids = []
 
 	mode_str = scoreUtils.readableGameMode(mode)
@@ -103,4 +106,13 @@ def handle(mode, score, beatmap, user_data):
 	return achievement_ids
 
 def update(userID):
-	pass
+	achievement_ids = []
+
+	entries = glob.db.fetchAll("SELECT beatmap_md5, play_mode FROM scores WHERE full_combo = 1 AND completed >= 2 AND userid = %s GROUP BY beatmap_md5, play_mode", [userID])
+	for entry in entries:
+		current_beatmap = beatmap.beatmap()
+		current_beatmap.setDataFromDB(entry["beatmap_md5"])
+		
+		achievement_ids += check(entry["play_mode"], entry["beatmap_md5"])
+
+	return achievement_ids
