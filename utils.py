@@ -6,7 +6,7 @@ import importlib
 import json
 
 def load_achievements():
-	"""Load all the achievements from the sql server into glob.achievementClasses,
+	"""Load all the achievements from handler list into glob.achievementClasses,
 	and sets glob.ACHIEVEMENTS_VERSION to the highest version number in our achievement list.
 	"""
 
@@ -18,53 +18,13 @@ def load_achievements():
 		module = importlib.import_module("secret.achievements.handlers." + module)
 		module.load()
 		if module.ORDER in glob.achievementClasses:
-			print("!!! FOUND OVERLAPPING ACHIEVEMENT ORDER FOR {}!!!".format(module.ORDER))
-			print("Unable to load {} due to {} already loaded in slot {}".format(module.__name__, glob.achievementClasses[module.ORDER].__name__, module.ORDER))
+			print("\n!!! FOUND OVERLAPPING ACHIEVEMENT ORDER FOR {}!!!".format(module.ORDER))
+			print("Unable to load {} due to {} already loaded in slot {}\n".format(module.__name__, glob.achievementClasses[module.ORDER].__name__, module.ORDER))
 			continue
 		glob.achievementClasses[module.ORDER] = module
 		glob.ACHIEVEMENTS_VERSION = max(glob.ACHIEVEMENTS_VERSION, module.VERSION)
 	
-	print("Loaded {} achievements!".format(len(modules)))
-
-def get_achievements_with_version(version):
-	"""Return same established achivement list structure but only with the achievements that matches
-	the argument passed.
-	
-	Arguments:
-		version {int} -- Version number to scan for
-	
-	Returns:
-		Dict -- Filtered achivement list
-	"""
-	achievements = {}
-	for mode, mode_val in glob.achievementClasses.items():
-		if mode not in achievements:
-			achievements[mode] = {}
-		for handle, handle_val in mode_val.items():
-			if handle not in achievements[mode]:
-				achievements[mode][handle] = []
-			for entry in handle_val:
-				if entry["version"] == version:
-					achievements[mode][handle].append(entry)
-	return achievements
-
-def unlock_achievements_scan(userID, version):
-	"""Scan specific version for past achievements they should have unlocked
-	
-	Arguments:
-		userID {int} -- User id of a player
-		version {int} -- Achivement version to scan
-	"""
-	achievements = []
-
-	#ach = achivement.ACHIEVEMENTS[version]
-	for mode, mode_val in glob.achievementClasses.items():
-		for handle, handle_val in mode_val.items():
-			pass
-			#for entry in handle_val:
-			#achievements += glob.achievementHandlers[handle].scan(mode, userID)
-	
-	return achievements
+	print("Loaded {} achievement classes!".format(len(glob.achievementClasses)), end=" ")
 
 def unlock_achievements_update(userID, version):
 	"""Scans the user for past achievements they should have unlocked
@@ -84,7 +44,13 @@ def unlock_achievements_update(userID, version):
 	for v in scan:
 		achievements += unlock_achievements_scan(userID, v)
 	"""
-	print("1")
+
+	# Scan all past achivement versions from the user's achivement version to the latest
+	index = 0
+	for handler in glob.achievementClasses.values():
+		if handler.VERSION > version:
+			achievements += [x + index for x in handler.update(userID)]
+		index += handler.LENGTH
 
 	# Update achivement version for user
 	userUtils.updateAchievementsVersion(userID)
