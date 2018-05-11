@@ -1,30 +1,25 @@
 from objects import glob
 from common.ripple import userUtils, scoreUtils
-
-glob.achievementHandlers = {}
-from . handlers import *
+from os.path import dirname, basename, isfile
+import glob as _glob
+import importlib
 
 def load_achievements():
 	"""Load all the achivements from the sql server into glob.achievementClasses,
 	and sets glob.ACHIEVEMENTS_VERSION to the highest version number in our achievement list.
 	"""
-	achivements = glob.db.fetchAll("SELECT id, name, description, icon, version FROM achievements ORDER BY id ASC;")
-	for achivement in achivements:
-		keys = achivement["icon"].split("-")
 
-		# TODO: Set version as part of the first few keys in the keychain
+	modules = _glob.glob("handlers/*.py")
+	modules = [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith("__init__.py")]
+	#						^ cat face
 
-		# Change osu keyword to std in first key
-		keys[0].replace("osu", "std")
-
-		if keys[0] not in glob.achievementClasses:
-			glob.achievementClasses[keys[0]] = {}
-		if keys[1] not in glob.achievementClasses[keys[0]]:
-			glob.achievementClasses[keys[0]][keys[1]] = []
-		glob.achievementClasses[keys[0]][keys[1]].append(achivement)
-
-		# Set the achivement version as the newest achivement version number if higher then the old value
-		glob.ACHIEVEMENTS_VERSION = max(glob.ACHIEVEMENTS_VERSION, achivement["version"])
+	for module in modules:
+		module = importlib.import_module("handlers." + module)
+		module.load()
+		glob.achievementClasses[module.ORDER] = module
+		glob.ACHIEVEMENTS_VERSION = max(glob.ACHIEVEMENTS_VERSION, module.VERSION)
+	
+	print("Loaded {} achievements!".format(len(modules)))
 
 def get_achievements_with_version(version):
 	"""Return same established achivement list structure but only with the achivements that matches
@@ -60,8 +55,9 @@ def unlock_achievements_scan(userID, version):
 	#ach = achivement.ACHIVEMENTS[version]
 	for mode, mode_val in glob.achievementClasses.items():
 		for handle, handle_val in mode_val.items():
+			pass
 			#for entry in handle_val:
-			achivements += glob.achievementHandlers[handle].scan(mode, userID)
+			#achivements += glob.achievementHandlers[handle].scan(mode, userID)
 	
 	return achivements
 
@@ -116,13 +112,13 @@ def unlock_achievements(score, beatmap, user_data):
 	if user_version < glob.ACHIEVEMENTS_VERSION:
 		achivements += unlock_achievements_update(userID, user_version)
 
-	# Check if user should get new achivement
-	"""
-	for version in achivement.ACHIVEMENTS.values():
-		for callback in version[gamemode_name]:
-			achivements += callback.handle(gamemode_name, score)
-	"""
-	print("2")
+	# Check if gameplay should get new achivement
+	index = 0
+	for handler in glob.achievementClasses.values():
+		achivements += [x + index for x in handler.handle(gamemode_index, score, beatmap)]
+		index += handler.LENGTH
+	
+	# TODO: use user_data to remove achievements we already have
 
 	return achivements
 
