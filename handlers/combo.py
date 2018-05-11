@@ -8,22 +8,20 @@ ORDER = 1
 LENGTH = 0
 
 ACHIEVEMENT_BASE = {
-	"name": "{index} Combo (osu!{mode_2})",
+	"name": "{index} Combo (osu!{mode})",
 	"description": "{index} big ones! You're moving up in the world!",
-	"icon": "{mode}-combo-{index}"
+	"icon": "osu-combo-{index}"
 }
 
 ACHIEVEMENT_KEYS = {
 	"index": [500, 750, 1000, 2000],
-	"mode_2": ["std", "taiko", "ctb", "mania"],
-	"mode": ["osu", "taiko", "ctb", "mania"]
+	"mode": ["std", "taiko", "ctb", "mania"]
 }
 
 # For every itteration index gets increased, while mode and mode_2 gets increased every 4 itterations
 ACHIEVEMENT_STRUCT = {
 	"index": 1,
-	"mode": 4,
-	"mode_2": 4
+	"mode": 4
 }
 
 ACHIEVEMENTS = []
