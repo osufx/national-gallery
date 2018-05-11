@@ -55,8 +55,8 @@ def check(mode, max_combo):
 def update(userID):
 	achievement_ids = []
 
-	entries = glob.db.fetchAll("SELECT MAX(max_combo), play_mode FROM scores WHERE userid = %s GROUP BY play_mode", [userID])
+	entries = glob.db.fetchAll("SELECT MAX(max_combo) AS max_combo, play_mode FROM scores WHERE userid = %s AND completed >= 2 GROUP BY play_mode", [userID])
 	for entry in entries:
-		achievement_ids += check(entry["mode"], entry["max_combo"])
+		achievement_ids += check(entry["play_mode"], entry["max_combo"])
 
 	return achievement_ids
