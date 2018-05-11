@@ -98,3 +98,6 @@ def handle(mode, score, beatmap, user_data):
 		achievement_ids.append(mode + index * 4)
 
 	return achievement_ids
+
+def update(userID):
+	pass

@@ -1,5 +1,5 @@
 import math
-#from objects import glob
+from objects import glob
 
 VERSION = 1
 ORDER = 1
@@ -41,10 +41,23 @@ def load():
 		ACHIEVEMENTS.append({x: ACHIEVEMENT_BASE[x].format_map(format_data) for x in ACHIEVEMENT_BASE})
 
 def handle(mode, score, beatmap, user_data):
+	return check(mode, score.maxCombo)
+
+def check(mode, max_combo):
 	achievement_ids = []
-	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x <= score.maxCombo]
+	indexies = [x for x in ACHIEVEMENT_KEYS["index"] if x <= max_combo]
 
 	for index in indexies:
 		achievement_ids.append(index + mode * 4)
+
+	return achievement_ids
+
+def update(userID):
+	achievement_ids = []
+
+	for mode in range(4):
+		max_combo = glob.db.fetch("SELECT max_combo FROM scores WHERE userid = %s AND play_mode = %s ORDER BY max_combo DESC LIMIT 1", [userID, mode])
+		if max_combo is not None:
+			achievement_ids += check(mode, max_combo)
 
 	return achievement_ids
