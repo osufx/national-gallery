@@ -111,6 +111,6 @@ def update(userID):
 		current_beatmap = beatmap.beatmap()
 		current_beatmap.setDataFromDB(entry["beatmap_md5"])
 
-		achievement_ids += check(entry["play_mode"], entry["beatmap_md5"])
+		achievement_ids += check(entry["play_mode"], current_beatmap)
 
 	return achievement_ids
