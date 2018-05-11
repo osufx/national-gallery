@@ -1,5 +1,7 @@
 import math
 from common.ripple import scoreUtils
+from objects import glob
+from objects import beatmap
 
 VERSION = 2
 ORDER = 2
@@ -85,6 +87,9 @@ def load():
 		ACHIEVEMENTS.append({x: ACHIEVEMENT_BASE[x].format_map(format_data) for x in ACHIEVEMENT_BASE})
 
 def handle(mode, score, beatmap, user_data):
+	return check(mode, beatmap)
+
+def check(mode, beatmap):
 	achievement_ids = []
 
 	mode_str = scoreUtils.readableGameMode(mode)
@@ -100,4 +105,13 @@ def handle(mode, score, beatmap, user_data):
 	return achievement_ids
 
 def update(userID):
-	pass
+	achievement_ids = []
+
+	entries = glob.db.fetchAll("SELECT beatmap_md5, play_mode FROM scores WHERE completed = 3 AND userid = %s", [userID])
+	for entry in entries:
+		current_beatmap = beatmap.beatmap()
+		current_beatmap.setDataFromDB(entry["beatmap_md5"])
+		
+		achievement_ids += check(entry["play_mode"], entry["beatmap_md5"])
+
+	return achievement_ids
