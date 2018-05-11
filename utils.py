@@ -64,21 +64,22 @@ def unlock_achievements(score, beatmap, user_data):
 	achievements = []
 
 	userID = userUtils.getID(score.playerName)
-	achieved = glob.redis.get("lets:user_achievement_cache:{}".format(userID))
-	if achieved is None:
+	
+	user_cache = glob.redis.get("lets:user_achievement_cache:{}".format(userID))
+	if user_cache is None:
 		# Load from sql database
-		achieved = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id=%s", [userID])]
-		glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(achieved), 1800)
+		user_cache = {}
+		user_cache["version"] = userUtils.getAchievementsVersion(userID)
+		user_cache["achievements"] = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id=%s", [userID])]
 	else:
-		achieved = json.loads(achieved.decode("utf-8"))
+		user_cache = json.loads(user_cache.decode("utf-8"))
 
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
 
 	# Check if user should run achivement recheck
-	user_version = userUtils.getAchievementsVersion(userID)
-	if user_version < glob.ACHIEVEMENTS_VERSION:
-		achievements += unlock_achievements_update(userID, user_version)
+	if user_cache["version"] < glob.ACHIEVEMENTS_VERSION:
+		achievements += unlock_achievements_update(userID, user_cache["version"])
 
 	# Check if gameplay should get new achivement
 	index = 0
@@ -90,9 +91,10 @@ def unlock_achievements(score, beatmap, user_data):
 	achievements = list(set(achievements))
 
 	# Remove already achived achievements from list
-	achievements = [x for x in achievements if x not in achieved]
+	achievements = [x for x in achievements if x not in user_cache["achievements"]]
 
-	glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(achieved + achievements), 1800)
+	user_cache["achievements"] += achievements
+	glob.redis.set("lets:user_achievement_cache:{}".format(userID), json.dumps(user_cache), 1800)
 
 	for achievement in achievements:
 		userUtils.unlockAchievement(userID, achievement)
