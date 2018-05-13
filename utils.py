@@ -39,7 +39,7 @@ def unlock_achievements_update(userID, version):
 	achievements = []
 
 	# Scan all past achivement versions from the user's achivement version to the latest
-	index = 0
+	index = 1
 	for handler in glob.achievementClasses.values():
 		if handler.VERSION > version:
 			achievements += [x + index for x in handler.update(userID)]
@@ -82,7 +82,7 @@ def unlock_achievements(score, beatmap, user_data):
 		achievements += unlock_achievements_update(userID, user_cache["version"])
 
 	# Check if gameplay should get new achivement
-	index = 0
+	index = 1
 	for handler in glob.achievementClasses.values():
 		achievements += [x + index for x in handler.handle(gamemode_index, score, beatmap, user_data)]
 		index += handler.LENGTH
@@ -104,7 +104,7 @@ def unlock_achievements(score, beatmap, user_data):
 def achievements_response(achievements):
 	achievement_objects = []
 
-	index = 0
+	index = 1
 	for handler in glob.achievementClasses.values():
 		achievement_objects += [handler.ACHIEVEMENTS[x - index] for x in achievements if len(handler.ACHIEVEMENTS) > x - index and x - index >= 0]
 		index += handler.LENGTH
