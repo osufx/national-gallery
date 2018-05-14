@@ -1,9 +1,10 @@
 from objects import glob
-from common.ripple import userUtils, scoreUtils
+from common.ripple import userUtils
 from os.path import dirname, basename, isfile
 import glob as _glob
 import importlib
 import json
+from secret.achievements import common
 
 def load_achievements():
 	"""Load all the achievements from handler list into glob.achievementClasses,
@@ -64,15 +65,7 @@ def unlock_achievements(score, beatmap, user_data):
 	achievements = []
 
 	userID = userUtils.getID(score.playerName)
-	
-	user_cache = glob.redis.get("lets:user_achievement_cache:{}".format(userID))
-	if user_cache is None:
-		# Load from sql database
-		user_cache = {}
-		user_cache["version"] = userUtils.getAchievementsVersion(userID)
-		user_cache["achievements"] = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id=%s", [userID])]
-	else:
-		user_cache = json.loads(user_cache.decode("utf-8"))
+	user_cache = common.get_usercache(userID)
 
 	# Get current gamemode and change value std to osu
 	gamemode_index = score.gameMode
@@ -87,6 +80,12 @@ def unlock_achievements(score, beatmap, user_data):
 		achievements += [x + index for x in handler.handle(gamemode_index, score, beatmap, user_data)]
 		index += handler.LENGTH
 	
+	# Add pending achievements that were added though redis or mysql
+	achievements += [-x for x in user_cache["achievements"] if x < 0] # Negative achievements id's means its pending
+
+	# Remove pending achievements from redis object since we added it to the post achievements
+	user_cache["achievements"] = [x for x in user_cache["achievements"] if x > 0]
+
 	# Remove duplicated achievements (incase of unlock_achievements_update adding stuff)
 	achievements = list(set(achievements))
 
