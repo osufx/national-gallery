@@ -25,10 +25,11 @@ def get_usercache(userID):
 	user_cache = glob.redis.get("lets:user_achievement_cache:{}".format(userID))
 	if user_cache is None:
 		user_cache = {}
+	else:
+		user_cache = json.loads(user_cache.decode("utf-8"))
 
 	if "version" not in user_cache:
 		# Load from sql database
-		user_cache = {}
 		user_cache["version"] = userUtils.getAchievementsVersion(userID)
 		db_achievements = [x["achievement_id"] for x in glob.db.fetchAll("SELECT achievement_id FROM users_achievements WHERE user_id = %s", [userID])]
 		if "achievements" in user_cache:
@@ -37,8 +38,6 @@ def get_usercache(userID):
 			user_cache["achievements"] = db_achievements
 		# Remove duplicates after merge
 		user_cache["achievements"] = list(set(user_cache["achievements"]))
-	else:
-		user_cache = json.loads(user_cache.decode("utf-8"))
 
 	return user_cache
 
