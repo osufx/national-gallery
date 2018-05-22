@@ -59,7 +59,7 @@ ACHIEVEMENT_KEYS = {
 	]
 }
 
-# For every itteration index gets increased, while mode and mode_2 gets increased every 4 itterations
+# For every itteration every index is increased by 1
 ACHIEVEMENT_STRUCT = {
 	"name": 1,
 	"description": 1,
