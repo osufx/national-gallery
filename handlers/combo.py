@@ -21,7 +21,7 @@ ACHIEVEMENT_KEYS = {
 	"mode": ["std", "taiko", "ctb", "mania"]
 }
 
-# For every itteration index gets increased and it will loop around when it hits its array length, while mode gets increased every 4 itterations
+# For every iteration index gets increased and it will loop around when it hits its array length, while mode gets increased every 4 itterations
 ACHIEVEMENT_STRUCT = {
 	"index": 1,
 	"mode": 4
