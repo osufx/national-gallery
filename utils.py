@@ -1,5 +1,5 @@
 from objects import glob
-from common.ripple import userUtils
+from common.ripple import userUtils, scoreUtils
 from os.path import dirname, basename, isfile
 import glob as _glob
 import importlib
@@ -62,6 +62,10 @@ def unlock_achievements(score, beatmap, user_data):
 	Returns:
 		Array -- List of achievements for the current play
 	"""
+	# Check if we have a valid mods
+	if not scoreUtils.isRankable(score.mods):
+		return []
+
 	achievements = []
 
 	userID = userUtils.getID(score.playerName)
