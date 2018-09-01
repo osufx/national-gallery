@@ -1,5 +1,5 @@
 if __name__ != "handlers.s_bunny":
-    	from secret.achievements import common
+	from secret.achievements import common
 	from objects import glob
 else:
 	import common
@@ -19,14 +19,14 @@ ACHIEVEMENT_BASE = {
 ACHIEVEMENT_KEYS = {
 	"name": ["Don't let the bunny distract you!"],
 	"description": ["The order was indeed, not a rabbit."],
-    "icon": ["all-secret-bunny"]
+	"icon": ["all-secret-bunny"]
 }
 
 # Might implement something to "automate" this if there is only one achievement for this handler (Make different structure)
 ACHIEVEMENT_STRUCT = {
-	"index": 1,
+	"name": 1,
 	"description": 1,
-    "icon": 1
+	"icon": 1
 }
 
 ACHIEVEMENTS = []

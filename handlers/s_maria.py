@@ -1,5 +1,5 @@
 if __name__ != "handlers.s_maria":
-    	from secret.achievements import common
+	from secret.achievements import common
 	from objects import glob
 else:
 	import common
@@ -24,7 +24,7 @@ ACHIEVEMENT_KEYS = {
 
 # Might implement something to "automate" this if there is only one achievement for this handler (Make different structure)
 ACHIEVEMENT_STRUCT = {
-	"index": 1,
+	"name": 1,
 	"description": 1,
     "icon": 1
 }
