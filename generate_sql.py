@@ -12,7 +12,7 @@ import math
 SQL_STRING = """
 CREATE TABLE IF NOT EXISTS `achievements` (
   `id` int(11) NOT NULL,
-  `name` varchar(32) NOT NULL,
+  `name` varchar(64) NOT NULL,
   `description` varchar(128) NOT NULL,
   `icon` varchar(32) NOT NULL,
   `version` int(11) NOT NULL DEFAULT '0',
